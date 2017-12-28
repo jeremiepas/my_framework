@@ -1,0 +1,6 @@
+
+#DirectoryIndex vendor/index.php
+RewriteEngine on
+
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^([a-zA-Z0-9\-\_\/]*)$ vendor/index.php?p=$1
