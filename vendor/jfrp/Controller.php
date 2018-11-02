@@ -18,32 +18,33 @@ abstract class Controller{
              $this->input = json_decode(file_get_contents('php://input'),true);
         // }
     }
-    public function render($filename, $data = ['']){
+    public function render($filename, $data = ['']) {
         $basekey = [];
         $basekey['maincss'] = 'public/css/main.css';
         $basekey['mainjs'] = 'public/js/main.js';
         $basekey['webroot'] = WEBROOT;
         $basekey['baseaccet'] = explode(":", $filename)[0];
         $content_for_layout  = '';
-        ob_start();
         $filename = str_replace(':', '/', $filename);
         if(file_exists(ROOT.'app/views/'.$filename.'.html')){
+          ob_start();
         	require(ROOT.'app/views/'.$filename.'.html');
         	$content_for_layout = ob_get_clean();
     	   }
+
+         if(file_exists(ROOT.'vendor/jfrp/views.html')){
+           ob_start();
+           require(ROOT.'vendor/jfrp/views.html');
+           $content_for_view = ob_get_clean();
+         }
+
          foreach ($data as $key => $value) {
            $regex = '/({{+\s+'.$key.'+\s+}})/';
            $content_for_layout = preg_replace($regex, $value, $content_for_layout);
          }
-        //  function change(file){
-        //    return file;
-        //  }
            $regex = '/({{+\s+(_)+(.+)+\s+}})/';
            $content_for_layout = preg_replace($regex, '$3', $content_for_layout);
-         if(file_exists(ROOT.'vendor/jfrp/views.html')){
-           require(ROOT.'vendor/jfrp/views.html');
-           $content_for_view = ob_get_clean();
-         }
+
          $basekey['content'] = $content_for_layout;
          foreach ($basekey as $key => $value) {
            $regex = '/({{+\s+'.$key.'+\s+}})/';
@@ -52,7 +53,7 @@ abstract class Controller{
 
         echo $content_for_view;
 	}
-    public function renderjson($result){
+    public function renderjson($result) {
         if (!$result) {
           http_response_code(404);
           die('erreur');

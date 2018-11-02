@@ -1,31 +1,20 @@
+<div>
+  <div class="">
+    list of databases
+  </div>
+  <div class="">
+      {{ list_bds }}
+  </div>
+  <div class="">
+      <form class="" action="" method="post">
+        <label for="add_database">add database +</label>
+        <input type="text" name="database" value="">
+        <input type="submit" name="" value="">
+      </form>
+  </div>
+</div>
 
-        <div>
 
-        </div>
-        <div>
-            <input type="text" id="name" value="" placeholder="name">
-            <input type="text" id="email" value="" placeholder="email">
-            <input type="submit" id="submituser" name="" onclick="insertuser()" value="ajout user">
-        </div>
-        <div id="form_task" style="display:none">
-            <input type="text" id="title" value="" placeholder="title">
-            <input type="text" id="description" value="" placeholder="description">
-            <input type="text" id="status" value="" placeholder="status">
-            <input type="submit" id="submittask" name="" onclick="inserttask()" value="ajout user">
-        </div>
-        <div> 
-
-            <table id="list">
-
-            </table>
-            <table id="listtask">
-
-            </table>
-        </div>
-        <button type="button" onclick="viewsuser()">charge user</button>
-        <script type="text/javascript">
-            var route ='{{ route }}';
-        </script>
-    <script src="public/js/restapi.js" charset="utf-8"></script>
-    <script src="public/js/userapi.js" charset="utf-8"></script>
-    <script src="public/js/taskapi.js" charset="utf-8"></script>
+<script src="public/js/restapi.js" charset="utf-8"></script>
+<script src="public/js/userapi.js" charset="utf-8"></script>
+<script src="public/js/taskapi.js" charset="utf-8"></script>

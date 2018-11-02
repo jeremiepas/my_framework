@@ -8,36 +8,79 @@ abstract class Models {
     private  $database;
     private  $host;
     private $type;
+    private $port;
+
     function __construct() {
         $db = parse_ini_file(ROOT ."/config/data_base.ini");
         $this->setuser($db['user']);
-        $this->setpassword($db['pass']);
-        $this->setdatabase($db['name']);
+        $this->setpassword($db['password']);
+        $this->setdatabase($db['database']);
         $this->sethost($db['host']);
+        $this->setport($db['port']);
         $this->settype($db['type']);
         if (self::$_pdo === null) {
-            self::$_pdo = new \PDO("$this->type:dbname=".$this->database.";host=".$this->host, $this->user, $this->password);
+          if ($this->database == null) {
+            self::$_pdo = new \PDO($this->type.":host=".$this->host.";port=".$this->port, $this->user, $this->password);
+          } else {
+            self::$_pdo = new \PDO("$this->type:dbname=".$this->database.";port=".$this->port.";host=".$this->host, $this->user, $this->password);
+          }
         }
     }
     private function setuser($data){
-        $this->user = $data;
+      $this->user = $data;
     }
     private function setpassword($data){
-        $this->password = $data;
+      $this->password = $data;
     }
      private function setdatabase($data){
-        $this->database = $data;
+      $this->database = $data;
     }
     private function sethost($data){
-            $this->host = $data;
+      $this->host = $data;
     }
-    private function settype($data){
-        $this->type = $data;
+    private function setport($data) {
+      $this->port = $data;
     }
-    protected function settable($data){
-        $this->table = $data;
+    private function settype($data) {
+      $this->type = $data;
     }
-    protected function setdata($tab){
+    protected function settable($data) {
+      $this->table = $data;
+    }
+    protected function showdatabases() {
+      $dbs =  self::$_pdo->query( 'SHOW DATABASES' );
+      $araydbs = [];
+      while( ( $db = $dbs->fetchColumn( 0 ) ) !== false )
+      {
+          array_push($araydbs, $db);
+      }
+      return $araydbs;
+    }
+    protected function createdatabase($name) {
+      $str = "CREATE DATABASE IF NOT EXISTS ".$name;
+      $query = self::$_pdo->prepare($str);
+      if($query->execute()){
+          return $this->showdatabases();
+      }
+    }
+
+    protected function deletedatabase($name) {
+      $str = "DELETE DATABASE :name";
+      $query = self::$_pdo->prepare($str);
+      if ($query->execute(array(':name' => $name))){
+          return $this->showdatabases();
+      }
+    }
+
+    protected function renamedatabase($old_name, $new_name) {
+      $str = "RENAME DATABASE :oldname TO :newname";
+      $query = self::$_pdo->prepare($str);
+      if($query->execute(array(':oldname' => $old_name, ':newname' => $new_name))){
+          return $this->showdatabases();
+      }
+    }
+
+    protected function setdata($tab) {
         $str = "VALUE (";
         $sql = "INSERT INTO $this->table (";
         foreach ($tab as $key => $value) {
@@ -55,19 +98,21 @@ abstract class Models {
             return $this->getdata('id = ?', $tab);
         }
     }
-    protected function getdata($cmd =null, $tab=null){
-        if($cmd == null && $tab == null){
+
+    protected function getdata($cmd =null, $tab=null) {
+        if ($cmd == null && $tab == null) {
             $sql = "SELECT * FROM $this->table";
             $query = self::$_pdo->prepare($sql);
             $query->execute();
-        }else{
+        } else {
             $sql = "SELECT * FROM $this->table WHERE $cmd;";
             $query = self::$_pdo->prepare($sql);
             $query->execute($tab);
         }
         return $query->fetchAll(\PDO::FETCH_ASSOC);
     }
-    protected function updatedata($where, $tab){
+
+    protected function updatedata($where, $tab) {
         $sql = "UPDATE $this->table SET "; //`pwd` = 'set' WHERE" `user`.`id` = 1;
         foreach ($tab as $key => $value) {
             $sql = $sql." `$key`= :$key, ";
@@ -83,6 +128,7 @@ abstract class Models {
         $query->execute($tb);
         return $query->rowCount();
     }
+
     protected function deletedata($cmd){
         $sql = "DELETE FROM $this->table WHERE ";
         foreach ($cmd as $key => $value) {
@@ -94,6 +140,7 @@ abstract class Models {
         $query->execute($td);
         return true;
     }
+
     public function H($str){
         $mdp = hash('ripemd160', $str . 'do not pass');
         return $mdp;
